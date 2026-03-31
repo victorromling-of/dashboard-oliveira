@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Oliveira Foundation</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1a1a2e;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.header h1{font-size:20px;font-weight:700}
+.header p{font-size:12px;opacity:.8}
+.header button{padding:8px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;cursor:pointer;font-size:13px;transition:.2s}
+.header button:hover{background:rgba(255,255,255,.25)}
+.container{max-width:900px;margin:0 auto;padding:16px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:20px;background:#fff;padding:14px;border-radius:10px;border:1px solid #e5e7eb}
+.filters label{font-size:11px;color:#6b7280;font-weight:600;display:block;margin-bottom:3px}
+.filters select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:13px;background:#fff}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;text-align:center}
+.kpi .icon{font-size:24px;margin-bottom:4px}
+.kpi .val{font-size:28px;font-weight:700}
+.kpi .lbl{font-size:11px;color:#6b7280;margin-top:2px}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:700px){.charts{grid-template-columns:1fr}}
+.chart-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.chart-box h3{font-size:14px;margin-bottom:12px;font-weight:600}
+.bar-row{margin-bottom:8px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px}
+.bar-label span:last-child{font-weight:600}
+.bar-bg{height:18px;background:#f1f5f9;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.table-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;overflow:auto}
+.table-box h3{font-size:14px;margin-bottom:12px;font-weight:600}
+.table-scroll{max-height:400px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{border-bottom:2px solid #e5e7eb;position:sticky;top:0;background:#fff}
+th{text-align:left;padding:6px 8px;color:#6b7280;font-weight:600}
+th.r{text-align:right}
+td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
+td.r{text-align:right;font-weight:600}
+td.name{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.footer{text-align:center;font-size:11px;color:#9ca3af;margin-top:16px;padding-bottom:20px}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center}
+.loading .spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top:4px solid #2563eb;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{text-align:center;padding:60px 20px}
+.error button{margin-top:16px;padding:10px 24px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 Dashboard Oliveira Foundation</h1>
+    <p id="subtitle">Carregando dados...</p>
+  </div>
+  <button onclick="loadData()">🔄 Atualizar Dados</button>
+</div>
+
+<div class="container">
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <h2 style="font-size:18px;margin-bottom:6px">Conectando ao Bitrix24...</h2>
+    <p id="loadingText" style="color:#666;font-size:14px">Iniciando...</p>
+  </div>
+
+  <div id="errorBox" class="error" style="display:none">
+    <div style="font-size:40px;margin-bottom:12px">❌</div>
+    <h2 style="font-size:18px;color:#dc2626;margin-bottom:6px">Erro na conexão</h2>
+    <p id="errorMsg" style="color:#666;font-size:14px;max-width:400px;margin:0 auto"></p>
+    <button onclick="loadData()">Tentar novamente</button>
+  </div>
+
+  <div id="dashboard" style="display:none">
+    <div class="filters" id="filtersBox"></div>
+    <div class="kpis" id="kpisBox"></div>
+    <div class="charts" id="chartsBox"></div>
+    <div class="table-box" id="tableBox"></div>
+  </div>
+</div>
+
+<p class="footer" id="footer"></p>
+
+<script>
+const WEBHOOK = "https://oliveirafoundation.bitrix24.com.br/rest/1029/48tut1mtyz5i5dik";
+const F = {
+  title: "TITLE", type: "UF_CRM_6424348D49C8E", turma: "UF_CRM_1671573487",
+  mods: "UF_CRM_664DF22D06301", children: "UF_CRM_1671574960",
+  state: "UF_CRM_6424348D2A629", country: "UF_CRM_654D9AFA52CAF", date: "DATE_CREATE"
+};
+const TYPE_MAP = {"2227":"OSC","2237":"Inst. Religiosa","2231":"Escola Privada","2229":"Escola Pública","13353":"Sist. Socioeducativo"};
+const TURMA_MAP = {"611":"T1-2021","613":"T1-2022","615":"T2-2022","617":"T3-2022","749":"T1-2023","751":"T2-2023","753":"T3-2023","755":"T4-2023","2655":"T5-2023","2515":"T6-2023","2585":"T7-2023","3107":"T8-2023","2755":"T1-2024","3505":"T1-2024 Igrejas","3503":"T2-2024","3507":"NOROESTE-RJ","7091":"T3-2024","7343":"T2-2024 IGREJAS","10587":"T1-2025","11957":"T2-2025","20449":"T1-2026","20451":"T2-2026"};
+const STATE_MAP = {"2173":"AC","2175":"AL","2177":"AP","2179":"AM","2181":"BA","2183":"CE","2185":"DF","2187":"ES","2189":"GO","2191":"MA","2193":"MT","2195":"MS","2197":"MG","2199":"PA","2201":"PB","2203":"PR","2205":"PE","2207":"PI","2209":"RJ","2211":"RN","2213":"RS","2215":"RO","2217":"RR","2219":"SC","2221":"SP","2223":"SE","2225":"TO","2823":"Exterior"};
+const COLORS = ["#2563eb","#f59e0b","#10b981","#ef4444","#8b5cf6","#ec4899","#06b6d4","#84cc16"];
+
+let allDeals = [];
+let filters = { year:"", turma:"", type:"", state:"" };
+
+async function loadData() {
+  document.getElementById("loading").style.display = "flex";
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("errorBox").style.display = "none";
+  try {
+    allDeals = [];
+    let start = 0, more = true;
+    const sel = ["ID", ...Object.values(F)];
+    while (more) {
+      document.getElementById("loadingText").textContent = `Carregando... ${allDeals.length} deals`;
+      const r = await fetch(`${WEBHOOK}/crm.deal.list`, {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ select: sel, start })
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      allDeals = allDeals.concat(d.result || []);
+      more = !!d.next;
+      if (d.next) start = d.next;
+    }
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    document.getElementById("subtitle").textContent = `${allDeals.length} deals carregados • Atualizado ${new Date().toLocaleString("pt-BR")}`;
+    buildFilters();
+    render();
+  } catch (e) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("errorBox").style.display = "block";
+    document.getElementById("errorMsg").textContent = e.message;
+  }
+}
+
+function buildFilters() {
+  const years = new Set(), turmas = new Set(), states = new Set();
+  allDeals.forEach(d => {
+    if (d.DATE_CREATE) years.add(new Date(d.DATE_CREATE).getFullYear());
+    if (d[F.turma] && TURMA_MAP[d[F.turma]]) turmas.add(d[F.turma]);
+    if (d[F.state] && STATE_MAP[d[F.state]]) states.add(d[F.state]);
+  });
+  const sYears = [...years].sort((a,b) => b-a);
+  const sTurmas = [...turmas].sort((a,b) => (TURMA_MAP[a]||"").localeCompare(TURMA_MAP[b]||""));
+  const sStates = [...states].sort((a,b) => (STATE_MAP[a]||"").localeCompare(STATE_MAP[b]||""));
+
+  document.getElementById("filtersBox").innerHTML = `
+    <div><label>Ano</label><select onchange="filters.year=this.value;render()"><option value="">Todos</option>${sYears.map(y=>`<option value="${y}">${y}</option>`).join("")}</select></div>
+    <div><label>Turma</label><select onchange="filters.turma=this.value;render()"><option value="">Todas</option>${sTurmas.map(id=>`<option value="${id}">${TURMA_MAP[id]}</option>`).join("")}</select></div>
+    <div><label>Tipo</label><select onchange="filters.type=this.value;render()"><option value="">Todos</option>${Object.entries(TYPE_MAP).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+    <div><label>Estado</label><select onchange="filters.state=this.value;render()"><option value="">Todos</option>${sStates.map(id=>`<option value="${id}">${STATE_MAP[id]}</option>`).join("")}</select></div>
+  `;
+}
+
+function getFiltered() {
+  let f = [...allDeals];
+  if (filters.year) f = f.filter(d => d.DATE_CREATE && new Date(d.DATE_CREATE).getFullYear() === parseInt(filters.year));
+  if (filters.turma) f = f.filter(d => String(d[F.turma]) === filters.turma);
+  if (filters.type) f = f.filter(d => String(d[F.type]) === filters.type);
+  if (filters.state) f = f.filter(d => String(d[F.state]) === filters.state);
+  return f;
+}
+
+function render() {
+  const data = getFiltered();
+  let totalCh = 0, totalMo = 0;
+  const byType = {}, byState = {}, insts = [];
+
+  data.forEach(d => {
+    const ch = parseFloat(d[F.children]) || 0;
+    const mo = parseFloat(d[F.mods]) || 0;
+    totalCh += ch; totalMo += mo;
+    const tId = d[F.type], tName = TYPE_MAP[tId] || (tId ? `Tipo ${tId}` : "Sem tipo");
+    byType[tName] = (byType[tName]||0) + 1;
+    const sId = d[F.state], sName = STATE_MAP[sId] || (sId ? sId : "N/D");
+    byState[sName] = (byState[sName]||0) + 1;
+    insts.push({ name: d.TITLE||`#${d.ID}`, type: tName, state: sName, ch, mo });
+  });
+
+  // KPIs
+  document.getElementById("kpisBox").innerHTML = [
+    {i:"🏛️",l:"Instituições",v:data.length,c:"#2563eb"},
+    {i:"🎓",l:"Crianças/Adolescentes",v:totalCh,c:"#10b981"},
+    {i:"👨‍🏫",l:"Moderadores",v:totalMo,c:"#f59e0b"},
+    {i:"📋",l:"Tipos",v:Object.keys(byType).length,c:"#8b5cf6"}
+  ].map(k => `<div class="kpi"><div class="icon">${k.i}</div><div class="val" style="color:${k.c}">${k.v.toLocaleString("pt-BR")}</div><div class="lbl">${k.l}</div></div>`).join("");
+
+  // Charts
+  const sortedT = Object.entries(byType).sort((a,b)=>b[1]-a[1]);
+  const sortedS = Object.entries(byState).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const maxT = Math.max(...sortedT.map(x=>x[1]),1);
+  const maxS = Math.max(...sortedS.map(x=>x[1]),1);
+
+  document.getElementById("chartsBox").innerHTML = `
+    <div class="chart-box"><h3>Por Tipo de Instituição</h3>${sortedT.map(([t,c],i) => `
+      <div class="bar-row"><div class="bar-label"><span>${t}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxT)*100}%;background:${COLORS[i%COLORS.length]}"></div></div></div>`).join("")}
+    </div>
+    <div class="chart-box"><h3>Por Estado (Top 15)</h3>${sortedS.map(([s,c],i) => `
+      <div class="bar-row"><div class="bar-label"><span>${s}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxS)*100}%;background:${COLORS[(i+3)%COLORS.length]}"></div></div></div>`).join("")}
+    </div>`;
+
+  // Table
+  insts.sort((a,b) => b.ch - a.ch);
+  document.getElementById("tableBox").innerHTML = `
+    <h3>Detalhamento por Instituição (${insts.length})</h3>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Instituição</th><th>Tipo</th><th>UF</th><th class="r">Crianças</th><th class="r">Moderadores</th></tr></thead>
+      <tbody>${insts.map(r => `<tr><td class="name">${r.name}</td><td>${r.type}</td><td>${r.state}</td><td class="r">${r.ch||"—"}</td><td class="r">${r.mo||"—"}</td></tr>`).join("")}</tbody>
+    </table></div>`;
+
+  document.getElementById("footer").textContent = `Dados em tempo real via API Bitrix24 • Oliveira Foundation • ${new Date().toLocaleString("pt-BR")}`;
+}
+
+loadData();
+</script>
+</body>
+</html>
