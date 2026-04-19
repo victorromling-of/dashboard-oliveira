@@ -104,6 +104,13 @@ body{min-height:100vh;padding-bottom:60px}
   .kpi .kpi-lbl{font-size:9px!important;letter-spacing:.12em!important;margin-bottom:6px!important}
   .kpi .kpi-unit{font-size:10px!important;margin-top:5px!important;line-height:1.3!important}
   .kpi .kpi-cta{left:12px!important;right:12px!important;bottom:10px!important;font-size:9px!important}
+
+  /* Overview cards: 2 colunas compactas */
+  .overview-cards{grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:16px!important}
+  .ov-card{padding:12px 12px!important}
+  .ov-card .ov-lbl{font-size:9px!important;margin-bottom:6px!important}
+  .ov-card .ov-val{font-size:24px!important}
+  .ov-card .ov-sub,.ov-card .ov-badge{font-size:10px!important}
 }
 
 /* ---------- SECTION HEADING ---------- */
@@ -204,6 +211,11 @@ td.stage{font-size:11px;color:var(--muted)}
 .ov-card .ov-lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--navy-600);font-weight:700;margin-bottom:10px}
 .ov-card .ov-val{font-family:sans-serif;font-size:36px;font-weight:400;line-height:1;letter-spacing:-.02em;color:var(--navy-900)}
 .ov-card .ov-dot{display:none}
+.ov-card .ov-sub{font-size:11px;color:var(--muted);margin-top:8px;font-weight:500}
+.ov-card .ov-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+.ov-badge-up{background:#dcfce7;color:#166534}
+.ov-badge-down{background:#fee2e2;color:#991b1b}
+.ov-badge-neutral{background:var(--navy-100);color:var(--navy-700)}
 
 .year-selector{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:24px}
 .year-selector .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--navy-600);font-weight:700;margin-right:8px}
@@ -800,8 +812,17 @@ function getFiltered(){
 function render(){
   const data=getFiltered();
   const anosComMeses=[...new Set(sheetsData.filter(d=>d.mes>0).map(d=>d.ano))];
-  const totalLivros=sheetsData.filter(d=>anosComMeses.includes(d.ano)?d.mes>0:d.mes===0).reduce((s,r)=>s+r.livros,0);
-  const totalMods=sheetsData.filter(d=>anosComMeses.includes(d.ano)?d.mes>0:d.mes===0).reduce((s,r)=>s+r.moderadores,0);
+
+  // Se há filtro de ano, mostra crianças/mods só daquele ano; senão, total histórico
+  const anoFiltro=filters.year?parseInt(filters.year):null;
+  const sheetsFiltered=anoFiltro
+    ? sheetsData.filter(d=>d.ano===anoFiltro&&(anosComMeses.includes(d.ano)?d.mes>0:d.mes===0))
+    : sheetsData.filter(d=>anosComMeses.includes(d.ano)?d.mes>0:d.mes===0);
+  const totalLivros=sheetsFiltered.reduce((s,r)=>s+r.livros,0);
+  const totalMods=sheetsFiltered.reduce((s,r)=>s+r.moderadores,0);
+  const kpiUnit=anoFiltro?`Em ${anoFiltro}`:"Total histórico";
+  const kpiUnitMods=anoFiltro?`Em ${anoFiltro}`:"Formados ao longo dos anos";
+
   const ativos=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").length;
   const byType={},byState={};
   data.forEach(d=>{
@@ -815,8 +836,8 @@ function render(){
   document.getElementById("kpisBox").innerHTML=`
     <div class="kpi"><div class="kpi-accent" style="background:var(--ink)"></div><div class="kpi-lbl">Instituições</div><div class="kpi-val">${data.length.toLocaleString("pt-BR")}</div><div class="kpi-unit">Total no recorte atual</div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Ativas</div><div class="kpi-val">${ativos.toLocaleString("pt-BR")}</div><div class="kpi-unit">Cadastradas no programa</div></div>
-    <div class="kpi clickable" onclick="openModal('livros')"><div class="kpi-accent" style="background:var(--accent-2)"></div><div class="kpi-lbl">Crianças atingidas</div><div class="kpi-val">${totalLivros.toLocaleString("pt-BR")}</div><div class="kpi-unit">Total histórico</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
-    <div class="kpi clickable" onclick="openModal('moderadores')"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-lbl">Moderadores</div><div class="kpi-val">${totalMods.toLocaleString("pt-BR")}</div><div class="kpi-unit">Formados ao longo dos anos</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
+    <div class="kpi clickable" onclick="openModal('livros')"><div class="kpi-accent" style="background:var(--accent-2)"></div><div class="kpi-lbl">Crianças atingidas</div><div class="kpi-val">${totalLivros.toLocaleString("pt-BR")}</div><div class="kpi-unit">${kpiUnit}</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
+    <div class="kpi clickable" onclick="openModal('moderadores')"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-lbl">Moderadores</div><div class="kpi-val">${totalMods.toLocaleString("pt-BR")}</div><div class="kpi-unit">${kpiUnitMods}</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
     <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tipos de instituição</div><div class="kpi-val">${Object.keys(byType).length.toLocaleString("pt-BR")}</div><div class="kpi-unit">Categorias representadas</div></div>`;
 
   // Charts
@@ -887,6 +908,25 @@ function renderAnalysis(){
   const totalAnos=years.length;
   const mediaAnoLivros=totalAnos?Math.round(totalLivros/totalAnos):0;
 
+  // Crescimento YoY: compara os dois anos mais recentes com dados completos
+  // Pega os 2 últimos anos em ordem crescente
+  const sortedYears=[...years].sort((a,b)=>a-b);
+  let crescPct=null, crescAbs=null, crescAno=null, crescAnoAnt=null;
+  if(sortedYears.length>=2){
+    const anoRecente=sortedYears[sortedYears.length-1];
+    const anoAnterior=sortedYears[sortedYears.length-2];
+    const vRecente=byYear[anoRecente]?.livros||0;
+    const vAnterior=byYear[anoAnterior]?.livros||0;
+    if(vAnterior>0){
+      crescAno=anoRecente; crescAnoAnt=anoAnterior;
+      crescAbs=vRecente-vAnterior;
+      crescPct=((vRecente-vAnterior)/vAnterior*100);
+    }
+  }
+  const crescSinal=crescPct===null?"neutral":crescPct>=0?"up":"down";
+  const crescLabel=crescPct===null?"—":`${crescPct>=0?"+":""}${crescPct.toFixed(1)}%`;
+  const crescIcon=crescPct===null?"":"crescPct>=0"?"▲":"▼";
+
   if(!years.includes(analyseYear)) analyseYear=years.includes(2026)?2026:(years[0]||2026);
 
   const dadosAno=sheetsData.filter(d=>d.ano===analyseYear);
@@ -908,10 +948,23 @@ function renderAnalysis(){
 
   document.getElementById("analysisBox").innerHTML=`
     <div class="overview-cards">
-      <div class="ov-card"><div class="ov-dot" style="background:var(--green)"></div><div class="ov-lbl">Total de crianças</div><div class="ov-val">${totalLivros.toLocaleString("pt-BR")}</div></div>
-      <div class="ov-card"><div class="ov-dot" style="background:var(--amber)"></div><div class="ov-lbl">Total moderadores</div><div class="ov-val">${totalMods.toLocaleString("pt-BR")}</div></div>
-      <div class="ov-card"><div class="ov-dot" style="background:var(--blue)"></div><div class="ov-lbl">Anos de atuação</div><div class="ov-val">${totalAnos}</div></div>
-      <div class="ov-card"><div class="ov-dot" style="background:var(--ink)"></div><div class="ov-lbl">Média crianças/ano</div><div class="ov-val">${mediaAnoLivros.toLocaleString("pt-BR")}</div></div>
+      <div class="ov-card">
+        <div class="ov-lbl">Anos de atuação</div>
+        <div class="ov-val">${totalAnos}</div>
+        <div class="ov-sub">${years.length?`${Math.min(...years)} – ${Math.max(...years)}`:"—"}</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-lbl">Média crianças/ano</div>
+        <div class="ov-val">${mediaAnoLivros.toLocaleString("pt-BR")}</div>
+        <div class="ov-sub">Média histórica</div>
+      </div>
+      <div class="ov-card">
+        <div class="ov-lbl">Crescimento anual</div>
+        <div class="ov-val" style="color:${crescSinal==="up"?"var(--green-600)":crescSinal==="down"?"var(--red)":"var(--navy-900)"}">
+          ${crescLabel}
+        </div>
+        ${crescPct!==null?`<div class="ov-badge ov-badge-${crescSinal}">${crescPct>=0?"▲":"▼"} ${Math.abs(crescAbs).toLocaleString("pt-BR")} crianças</div><div class="ov-sub">${crescAnoAnt} → ${crescAno}</div>`:`<div class="ov-sub">Dados insuficientes</div>`}
+      </div>
     </div>
 
     <div class="year-selector">
