@@ -378,8 +378,8 @@ function renderAnalysis(){
     ? dadosAno.filter(d=>d.mes>0).reduce((s,r)=>s+r.moderadores,0)
     : dadosAno.reduce((s,r)=>s+r.moderadores,0);
 
-  // Meses com dados no ano (para média do ano)
-  const mesesPreenchidos=[...new Set(dadosAno.filter(d=>d.mes>0).map(d=>d.mes))].sort((a,b)=>a-b);
+  // Meses com dados REAIS no ano (livros > 0) para média do ano
+  const mesesPreenchidos=[...new Set(dadosAno.filter(d=>d.mes>0&&d.livros>0).map(d=>d.mes))].sort((a,b)=>a-b);
   const mediaMesAno=mesesPreenchidos.length?Math.round(livrosAno/mesesPreenchidos.length):0;
 
   // Por mês do ano
@@ -436,28 +436,26 @@ function renderGoal(){
   const ANO_META=2026;
   const dados2026=sheetsData.filter(d=>d.ano===ANO_META);
 
-  // Livros atingidos em 2026
-  const temMeses2026=dados2026.some(d=>d.mes>0);
-  const atingido=temMeses2026
-    ? dados2026.filter(d=>d.mes>0).reduce((s,r)=>s+r.livros,0)
-    : dados2026.reduce((s,r)=>s+r.livros,0);
+  // Livros atingidos em 2026 (soma de todos os meses com livros > 0)
+  const atingido=dados2026.filter(d=>d.mes>0).reduce((s,r)=>s+r.livros,0);
 
   const restante=Math.max(0,META-atingido);
   const pct=Math.min(100,(atingido/META)*100);
 
-  // Meses preenchidos em 2026 (meses que já têm dados)
-  const mesesPreenchidos=[...new Set(dados2026.filter(d=>d.mes>0).map(d=>d.mes))].sort((a,b)=>a-b);
+  // Meses preenchidos em 2026 = meses que efetivamente têm livros reportados (livros > 0)
+  // Assim, mesmo que a planilha tenha linhas zeradas para meses futuros, eles não contam como "já passaram"
+  const mesesPreenchidos=[...new Set(dados2026.filter(d=>d.mes>0&&d.livros>0).map(d=>d.mes))].sort((a,b)=>a-b);
   const ultimoMesPreenchido=mesesPreenchidos.length?Math.max(...mesesPreenchidos):0;
 
-  // Meses restantes: do próximo mês após o último preenchido até dezembro
+  // Meses restantes: do próximo mês após o último com dados até dezembro
   // Se não houver nenhum preenchido, considera todos os 12 meses
   const primeiroMesRestante=ultimoMesPreenchido+1;
   const mesesRestantes=primeiroMesRestante<=12?(12-primeiroMesRestante+1):0;
 
-  // Média necessária por mês
+  // Média necessária por mês para bater a meta
   const mediaNecessaria=mesesRestantes>0?Math.floor(restante/mesesRestantes):0;
 
-  // Média atual por mês (baseada nos meses já preenchidos)
+  // Média atual por mês (baseada nos meses já preenchidos com dados > 0)
   const mediaAtual=mesesPreenchidos.length?Math.round(atingido/mesesPreenchidos.length):0;
 
   // Dados por mês para o gráfico
