@@ -421,7 +421,7 @@ td.stage{font-size:11px;color:var(--muted)}
     <section class="section">
       <div class="section-head">
         <h2>Análise interativa por ano</h2>
-        <span class="tag">02 · Analysis</span>
+        <span class="tag" style="color:var(--navy-900);background:var(--navy-50);border-color:var(--navy-200)">02 · Analysis</span>
       </div>
       <div class="analysis-card" id="analysisBox">
     <div class="overview-cards">
@@ -908,24 +908,20 @@ function renderAnalysis(){
   const totalAnos=years.length;
   const mediaAnoLivros=totalAnos?Math.round(totalLivros/totalAnos):0;
 
-  // Crescimento YoY: compara os dois anos mais recentes com dados completos
-  // Pega os 2 últimos anos em ordem crescente
-  const sortedYears=[...years].sort((a,b)=>a-b);
-  let crescPct=null, crescAbs=null, crescAno=null, crescAnoAnt=null;
-  if(sortedYears.length>=2){
-    const anoRecente=sortedYears[sortedYears.length-1];
-    const anoAnterior=sortedYears[sortedYears.length-2];
-    const vRecente=byYear[anoRecente]?.livros||0;
-    const vAnterior=byYear[anoAnterior]?.livros||0;
-    if(vAnterior>0){
-      crescAno=anoRecente; crescAnoAnt=anoAnterior;
-      crescAbs=vRecente-vAnterior;
-      crescPct=((vRecente-vAnterior)/vAnterior*100);
-    }
+  // Crescimento: média 2024-2026 vs média 2021-2023
+  const calcMedia=(yrs)=>{
+    const vals=yrs.map(y=>byYear[y]?.livros||0).filter(v=>v>0);
+    return vals.length?Math.round(vals.reduce((s,v)=>s+v,0)/vals.length):null;
+  };
+  const mediaRecente=calcMedia([2024,2025,2026]);
+  const mediaAnterior=calcMedia([2021,2022,2023]);
+  let crescPct=null, crescAbs=null;
+  if(mediaRecente!==null&&mediaAnterior!==null&&mediaAnterior>0){
+    crescAbs=mediaRecente-mediaAnterior;
+    crescPct=((mediaRecente-mediaAnterior)/mediaAnterior*100);
   }
   const crescSinal=crescPct===null?"neutral":crescPct>=0?"up":"down";
   const crescLabel=crescPct===null?"—":`${crescPct>=0?"+":""}${crescPct.toFixed(1)}%`;
-  const crescIcon=crescPct===null?"":"crescPct>=0"?"▲":"▼";
 
   if(!years.includes(analyseYear)) analyseYear=years.includes(2026)?2026:(years[0]||2026);
 
@@ -963,7 +959,7 @@ function renderAnalysis(){
         <div class="ov-val" style="color:${crescSinal==="up"?"var(--green-600)":crescSinal==="down"?"var(--red)":"var(--navy-900)"}">
           ${crescLabel}
         </div>
-        ${crescPct!==null?`<div class="ov-badge ov-badge-${crescSinal}">${crescPct>=0?"▲":"▼"} ${Math.abs(crescAbs).toLocaleString("pt-BR")} crianças</div><div class="ov-sub">${crescAnoAnt} → ${crescAno}</div>`:`<div class="ov-sub">Dados insuficientes</div>`}
+        ${crescPct!==null?`<div class="ov-badge ov-badge-${crescSinal}">${crescPct>=0?"▲":"▼"} ${Math.abs(crescAbs).toLocaleString("pt-BR")} crianças/ano</div><div class="ov-sub">Média '21–'23 vs '24–'26</div>`:`<div class="ov-sub">Dados insuficientes</div>`}
       </div>
     </div>
 
