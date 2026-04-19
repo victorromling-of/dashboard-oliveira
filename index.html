@@ -9,18 +9,21 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#1a1a2e;min-height:100vh}
 .header{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .header h1{font-size:20px;font-weight:700}
-.header p{font-size:12px;opacity:.8}
-.header button{padding:8px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;cursor:pointer;font-size:13px;transition:.2s}
+.header p{font-size:12px;opacity:.8;margin-top:2px}
+.header button{padding:8px 18px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;cursor:pointer;font-size:13px}
 .header button:hover{background:rgba(255,255,255,.25)}
-.container{max-width:920px;margin:0 auto;padding:16px}
+.container{max-width:940px;margin:0 auto;padding:16px}
 .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:20px;background:#fff;padding:14px;border-radius:10px;border:1px solid #e5e7eb}
 .filters label{font-size:11px;color:#6b7280;font-weight:600;display:block;margin-bottom:3px}
 .filters select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:13px;background:#fff}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
-.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;cursor:default;transition:.2s}
+.kpi.clickable{cursor:pointer}
+.kpi.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1);border-color:#2563eb}
 .kpi .icon{font-size:22px;margin-bottom:4px}
 .kpi .val{font-size:26px;font-weight:700}
 .kpi .lbl{font-size:11px;color:#6b7280;margin-top:2px}
+.kpi .hint{font-size:10px;color:#2563eb;margin-top:4px}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 @media(max-width:700px){.charts{grid-template-columns:1fr}}
 .chart-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
@@ -29,10 +32,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px}
 .bar-label span:last-child{font-weight:600}
 .bar-bg{height:18px;background:#f1f5f9;border-radius:4px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
-.table-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;overflow:auto}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.table-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;overflow:auto;margin-bottom:16px}
 .table-box h3{font-size:14px;margin-bottom:12px;font-weight:600}
-.table-scroll{max-height:450px;overflow:auto}
+.table-scroll{max-height:400px;overflow:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead tr{border-bottom:2px solid #e5e7eb;position:sticky;top:0;background:#fff}
 th{text-align:left;padding:6px 8px;color:#6b7280;font-weight:600}
@@ -45,9 +48,35 @@ td.name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowra
 .badge-declinado{background:#fef3c7;color:#92400e}
 .badge-cancelado{background:#fee2e2;color:#991b1b}
 .badge-processo{background:#dbeafe;color:#1e40af}
-.footer{text-align:center;font-size:11px;color:#9ca3af;margin-top:16px;padding-bottom:20px}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:700px;width:95%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:#6b7280;margin-bottom:20px}
+.modal-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.modal-filters select{padding:8px 12px;border-radius:8px;border:1px solid #d1d5db;font-size:13px;background:#fff}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-bottom:20px}
+.month-cell{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:10px 6px;text-align:center}
+.month-cell .m-name{font-size:11px;color:#6b7280;margin-bottom:4px}
+.month-cell .m-val{font-size:16px;font-weight:700;color:#2563eb}
+.month-cell .m-val2{font-size:12px;font-weight:600;color:#f59e0b}
+.year-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.year-tab{padding:6px 14px;border-radius:8px;border:1px solid #d1d5db;background:#fff;font-size:13px;cursor:pointer;transition:.2s}
+.year-tab.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.big-chart{margin-bottom:20px}
+.big-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.big-bar-label{font-size:11px;color:#6b7280;width:30px;text-align:right;flex-shrink:0}
+.big-bar-wrap{flex:1;background:#f1f5f9;border-radius:4px;height:22px;overflow:hidden}
+.big-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:11px;color:#fff;font-weight:600;transition:width .5s ease}
+.summary-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.summary-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center}
+.summary-card .sv{font-size:28px;font-weight:700}
+.summary-card .sl{font-size:12px;color:#6b7280;margin-top:3px}
+.footer{text-align:center;font-size:11px;color:#9ca3af;margin-top:8px;padding-bottom:20px}
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center}
-.loading .spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top:4px solid #2563eb;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+.spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top:4px solid #2563eb;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .error{text-align:center;padding:60px 20px}
 .error button{margin-top:16px;padding:10px 24px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px}
@@ -58,25 +87,23 @@ td.name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowra
 <div class="header">
   <div>
     <h1>📊 Dashboard Oliveira Foundation</h1>
-    <p id="subtitle">Carregando dados do pipeline de Cadastro...</p>
+    <p id="subtitle">Carregando dados...</p>
   </div>
-  <button onclick="loadData()">🔄 Atualizar Dados</button>
+  <button onclick="loadAll()">🔄 Atualizar</button>
 </div>
 
 <div class="container">
   <div id="loading" class="loading">
     <div class="spinner"></div>
-    <h2 style="font-size:18px;margin-bottom:6px">Conectando ao Bitrix24...</h2>
-    <p id="loadingText" style="color:#666;font-size:14px">Buscando dados do pipeline de Cadastro...</p>
+    <h2 style="font-size:18px;margin-bottom:6px">Carregando dados...</h2>
+    <p id="loadingText" style="color:#666;font-size:14px">Conectando ao Bitrix24 e Google Sheets...</p>
   </div>
-
   <div id="errorBox" class="error" style="display:none">
     <div style="font-size:40px;margin-bottom:12px">❌</div>
-    <h2 style="font-size:18px;color:#dc2626;margin-bottom:6px">Erro na conexão</h2>
+    <h2 style="font-size:18px;color:#dc2626;margin-bottom:6px">Erro</h2>
     <p id="errorMsg" style="color:#666;font-size:14px;max-width:400px;margin:0 auto"></p>
-    <button onclick="loadData()">Tentar novamente</button>
+    <button onclick="loadAll()">Tentar novamente</button>
   </div>
-
   <div id="dashboard" style="display:none">
     <div class="filters" id="filtersBox"></div>
     <div class="kpis" id="kpisBox"></div>
@@ -87,75 +114,72 @@ td.name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowra
 
 <p class="footer" id="footer"></p>
 
+<!-- MODAL LIVROS/MODERADORES -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <h2 id="modalTitle">📚 Livros Enviados</h2>
+    <p id="modalSubtitle">Detalhamento por ano e mês</p>
+    <div class="summary-row" id="modalSummary"></div>
+    <div class="year-tabs" id="yearTabs"></div>
+    <div class="big-chart" id="modalChart"></div>
+    <div class="month-grid" id="monthGrid"></div>
+  </div>
+</div>
+
 <script>
-const WEBHOOK = "https://oliveirafoundation.bitrix24.com.br/rest/1029/48tut1mtyz5i5dik";
-const CATEGORY_ID = 25;
-const F = {
-  title:"TITLE", type:"UF_CRM_6424348D49C8E", turma:"UF_CRM_1671573487",
-  mods:"UF_CRM_664DF22D06301", children:"UF_CRM_1671574960",
-  state:"UF_CRM_6424348D2A629", country:"UF_CRM_654D9AFA52CAF",
-  date:"DATE_CREATE", stage:"STAGE_ID", category:"CATEGORY_ID"
-};
+const WEBHOOK="https://oliveirafoundation.bitrix24.com.br/rest/1029/48tut1mtyz5i5dik";
+const SHEETS_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vS8HEL63VVw4b95yuoMLblsAr9IWw7Y-s9YShXXqseto9ElTqxLs2dM4u9KxiNqaliTGEPhm4yLbGrl/pub?gid=0&single=true&output=csv";
+const CATEGORY_ID=25;
+const F={title:"TITLE",type:"UF_CRM_6424348D49C8E",turma:"UF_CRM_1671573487",mods:"UF_CRM_664DF22D06301",children:"UF_CRM_1671574960",state:"UF_CRM_6424348D2A629",date:"DATE_CREATE",stage:"STAGE_ID"};
 const TYPE_MAP={"2227":"OSC","2237":"Inst. Religiosa","2231":"Escola Privada","2229":"Escola Pública","13353":"Sist. Socioeducativo"};
 const TURMA_MAP={"611":"T1-2021","613":"T1-2022","615":"T2-2022","617":"T3-2022","749":"T1-2023","751":"T2-2023","753":"T3-2023","755":"T4-2023","2655":"T5-2023","2515":"T6-2023","2585":"T7-2023","3107":"T8-2023","2755":"T1-2024","3505":"T1-2024 Igrejas","3503":"T2-2024","3507":"NOROESTE-RJ","7091":"T3-2024","7343":"T2-2024 IGREJAS","10587":"T1-2025","11957":"T2-2025","20449":"T1-2026","20451":"T2-2026"};
 const STATE_MAP={"2173":"AC","2175":"AL","2177":"AP","2179":"AM","2181":"BA","2183":"CE","2185":"DF","2187":"ES","2189":"GO","2191":"MA","2193":"MT","2195":"MS","2197":"MG","2199":"PA","2201":"PB","2203":"PR","2205":"PE","2207":"PI","2209":"RJ","2211":"RN","2213":"RS","2215":"RO","2217":"RR","2219":"SC","2221":"SP","2223":"SE","2225":"TO","2823":"Exterior"};
-const STAGE_MAP={
-  "C25:NEW":"Coleta de dados",
-  "C25:UC_PNHJ57":"Igreja Quadrangular (Temp.)",
-  "C25:UC_UK9VSV":"Formação de Moderadores",
-  "C25:PREPAYMENT_INVOIC":"Análise Compliance",
-  "C25:UC_A24K5R":"Análise do Jurídico",
-  "C25:EXECUTING":"Enviar contrato/termo",
-  "C25:UC_N4L2VB":"Enviar distrato/novo termo",
-  "C25:UC_SYUZG9":"Aguardando contrato",
-  "C25:WON":"Eu Lidero - Cadastrada",
-  "C25:LOSE":"Declinados",
-  "C25:1":"Parceria cancelada"
-};
-const STAGE_STATUS={
-  "C25:WON":"ativo",
-  "C25:LOSE":"declinado",
-  "C25:1":"cancelado"
-};
-function getStatusGroup(stageId){
-  if(STAGE_STATUS[stageId]) return STAGE_STATUS[stageId];
-  return "em_processo";
-}
-function getStatusLabel(stageId){
-  const g=getStatusGroup(stageId);
-  if(g==="ativo") return '<span class="badge badge-ativo">✅ Ativo</span>';
-  if(g==="declinado") return '<span class="badge badge-declinado">⚠️ Declinado</span>';
-  if(g==="cancelado") return '<span class="badge badge-cancelado">❌ Cancelado</span>';
-  return '<span class="badge badge-processo">🔄 Em processo</span>';
-}
+const STAGE_MAP={"C25:NEW":"Coleta de dados","C25:UC_PNHJ57":"Igreja Quadrangular","C25:UC_UK9VSV":"Formação Moderadores","C25:PREPAYMENT_INVOIC":"Análise Compliance","C25:UC_A24K5R":"Análise Jurídico","C25:EXECUTING":"Enviar contrato","C25:UC_N4L2VB":"Enviar distrato","C25:UC_SYUZG9":"Aguardando contrato","C25:WON":"Eu Lidero - Cadastrada","C25:LOSE":"Declinados","C25:1":"Parceria cancelada"};
 const COLORS=["#2563eb","#f59e0b","#10b981","#ef4444","#8b5cf6","#ec4899","#06b6d4","#84cc16"];
+const MONTHS=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
-let allDeals=[];
-let filters={year:"",turma:"",type:"",state:"",status:""};
+let allDeals=[], sheetsData=[], filters={year:"",turma:"",type:"",state:"",status:""};
+let modalMode="livros", selectedYear="todos";
 
-async function loadData(){
+function getStatusGroup(s){if(s==="C25:WON")return"ativo";if(s==="C25:LOSE")return"declinado";if(s==="C25:1")return"cancelado";return"em_processo";}
+function getStatusBadge(s){const g=getStatusGroup(s);if(g==="ativo")return'<span class="badge badge-ativo">✅ Ativo</span>';if(g==="declinado")return'<span class="badge badge-declinado">⚠️ Declinado</span>';if(g==="cancelado")return'<span class="badge badge-cancelado">❌ Cancelado</span>';return'<span class="badge badge-processo">🔄 Em processo</span>';}
+
+async function loadSheets(){
+  const r=await fetch(SHEETS_URL);
+  const text=await r.text();
+  const lines=text.trim().split("\n").slice(1);
+  return lines.map(l=>{
+    const cols=l.split(",");
+    return{ano:parseInt(cols[0])||0, mes:parseInt(cols[1])||0, livros:parseFloat(cols[2])||0, moderadores:parseFloat(cols[3])||0};
+  }).filter(d=>d.ano>0&&d.mes>0);
+}
+
+async function loadDeals(){
+  let all=[],start=0,more=true;
+  const sel=["ID",...Object.values(F)];
+  while(more){
+    document.getElementById("loadingText").textContent=`Carregando Bitrix24... ${all.length} instituições`;
+    const r=await fetch(`${WEBHOOK}/crm.deal.list`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({filter:{"CATEGORY_ID":CATEGORY_ID},select:sel,start})});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d=await r.json();
+    all=all.concat(d.result||[]);
+    more=!!d.next;
+    if(d.next) start=d.next;
+  }
+  return all;
+}
+
+async function loadAll(){
   document.getElementById("loading").style.display="flex";
   document.getElementById("dashboard").style.display="none";
   document.getElementById("errorBox").style.display="none";
   try{
-    allDeals=[];
-    let start=0,more=true;
-    const sel=["ID",...Object.values(F)];
-    while(more){
-      document.getElementById("loadingText").textContent=`Carregando... ${allDeals.length} instituições`;
-      const r=await fetch(`${WEBHOOK}/crm.deal.list`,{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({filter:{"CATEGORY_ID":CATEGORY_ID},select:sel,start})
-      });
-      if(!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d=await r.json();
-      allDeals=allDeals.concat(d.result||[]);
-      more=!!d.next;
-      if(d.next) start=d.next;
-    }
+    document.getElementById("loadingText").textContent="Carregando planilha de livros...";
+    [sheetsData, allDeals]=await Promise.all([loadSheets(), loadDeals()]);
     document.getElementById("loading").style.display="none";
     document.getElementById("dashboard").style.display="block";
-    document.getElementById("subtitle").textContent=`Pipeline Cadastro • ${allDeals.length} deals • Atualizado ${new Date().toLocaleString("pt-BR")}`;
+    document.getElementById("subtitle").textContent=`${allDeals.length} instituições (Cadastro) • Planilha: ${sheetsData.length} registros • ${new Date().toLocaleString("pt-BR")}`;
     buildFilters();
     render();
   }catch(e){
@@ -175,20 +199,12 @@ function buildFilters(){
   const sY=[...years].sort((a,b)=>b-a);
   const sT=[...turmas].sort((a,b)=>(TURMA_MAP[a]||"").localeCompare(TURMA_MAP[b]||""));
   const sS=[...states].sort((a,b)=>(STATE_MAP[a]||"").localeCompare(STATE_MAP[b]||""));
-
   document.getElementById("filtersBox").innerHTML=`
-    <div><label>Status</label><select onchange="filters.status=this.value;render()">
-      <option value="">Todos</option>
-      <option value="ativo">✅ Ativo (Cadastrado)</option>
-      <option value="em_processo">🔄 Em processo</option>
-      <option value="declinado">⚠️ Declinado</option>
-      <option value="cancelado">❌ Cancelado</option>
-    </select></div>
+    <div><label>Status</label><select onchange="filters.status=this.value;render()"><option value="">Todos</option><option value="ativo">✅ Ativo</option><option value="em_processo">🔄 Em processo</option><option value="declinado">⚠️ Declinado</option><option value="cancelado">❌ Cancelado</option></select></div>
     <div><label>Ano</label><select onchange="filters.year=this.value;render()"><option value="">Todos</option>${sY.map(y=>`<option value="${y}">${y}</option>`).join("")}</select></div>
     <div><label>Turma</label><select onchange="filters.turma=this.value;render()"><option value="">Todas</option>${sT.map(id=>`<option value="${id}">${TURMA_MAP[id]}</option>`).join("")}</select></div>
     <div><label>Tipo</label><select onchange="filters.type=this.value;render()"><option value="">Todos</option>${Object.entries(TYPE_MAP).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
-    <div><label>Estado</label><select onchange="filters.state=this.value;render()"><option value="">Todos</option>${sS.map(id=>`<option value="${id}">${STATE_MAP[id]}</option>`).join("")}</select></div>
-  `;
+    <div><label>Estado</label><select onchange="filters.state=this.value;render()"><option value="">Todos</option>${sS.map(id=>`<option value="${id}">${STATE_MAP[id]}</option>`).join("")}</select></div>`;
 }
 
 function getFiltered(){
@@ -203,76 +219,138 @@ function getFiltered(){
 
 function render(){
   const data=getFiltered();
-  let totalCh=0,totalMo=0;
-  const byType={},byState={},byStatus={},insts=[];
-
+  const totalLivros=sheetsData.reduce((s,r)=>s+r.livros,0);
+  const totalMods=sheetsData.reduce((s,r)=>s+r.moderadores,0);
+  const ativos=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").length;
+  const byType={},byState={};
   data.forEach(d=>{
-    const ch=parseFloat(d[F.children])||0;
-    const mo=parseFloat(d[F.mods])||0;
-    totalCh+=ch; totalMo+=mo;
     const tId=d[F.type],tName=TYPE_MAP[tId]||(tId?`Tipo ${tId}`:"Sem tipo");
     byType[tName]=(byType[tName]||0)+1;
     const sId=d[F.state],sName=STATE_MAP[sId]||(sId?sId:"N/D");
     byState[sName]=(byState[sName]||0)+1;
-    const stg=d[F.stage],stgGroup=getStatusGroup(stg);
-    const stgLabel=stgGroup==="ativo"?"✅ Ativo":stgGroup==="declinado"?"⚠️ Declinado":stgGroup==="cancelado"?"❌ Cancelado":"🔄 Em processo";
-    byStatus[stgLabel]=(byStatus[stgLabel]||0)+1;
-    insts.push({name:d.TITLE||`#${d.ID}`,type:tName,state:sName,ch,mo,stage:stg,stageLabel:STAGE_MAP[stg]||stg});
   });
 
-  // Count ativos
-  const ativos=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").length;
-  const ativoCh=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").reduce((s,d)=>s+(parseFloat(d[F.children])||0),0);
-  const ativoMo=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").reduce((s,d)=>s+(parseFloat(d[F.mods])||0),0);
-
-  document.getElementById("kpisBox").innerHTML=[
-    {i:"🏛️",l:"Total Instituições",v:data.length,c:"#2563eb"},
-    {i:"✅",l:"Ativas (Cadastradas)",v:ativos,c:"#16a34a"},
-    {i:"🎓",l:"Crianças/Adolescentes",v:totalCh,c:"#10b981"},
-    {i:"👨‍🏫",l:"Moderadores",v:totalMo,c:"#f59e0b"},
-    {i:"📋",l:"Tipos",v:Object.keys(byType).length,c:"#8b5cf6"}
-  ].map(k=>`<div class="kpi"><div class="icon">${k.i}</div><div class="val" style="color:${k.c}">${k.v.toLocaleString("pt-BR")}</div><div class="lbl">${k.l}</div></div>`).join("");
+  // KPIs
+  document.getElementById("kpisBox").innerHTML=`
+    <div class="kpi"><div class="icon">🏛️</div><div class="val" style="color:#2563eb">${data.length.toLocaleString("pt-BR")}</div><div class="lbl">Total Instituições</div></div>
+    <div class="kpi"><div class="icon">✅</div><div class="val" style="color:#16a34a">${ativos.toLocaleString("pt-BR")}</div><div class="lbl">Ativas (Cadastradas)</div></div>
+    <div class="kpi clickable" onclick="openModal('livros')"><div class="icon">📚</div><div class="val" style="color:#10b981">${totalLivros.toLocaleString("pt-BR")}</div><div class="lbl">Livros Enviados</div><div class="hint">🔍 Ver detalhes</div></div>
+    <div class="kpi clickable" onclick="openModal('moderadores')"><div class="icon">👨‍🏫</div><div class="val" style="color:#f59e0b">${totalMods.toLocaleString("pt-BR")}</div><div class="lbl">Moderadores</div><div class="hint">🔍 Ver detalhes</div></div>
+    <div class="kpi"><div class="icon">📋</div><div class="val" style="color:#8b5cf6">${Object.keys(byType).length.toLocaleString("pt-BR")}</div><div class="lbl">Tipos</div></div>`;
 
   // Charts
   const sortedT=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
   const sortedS=Object.entries(byState).sort((a,b)=>b[1]-a[1]).slice(0,15);
-  const sortedSt=Object.entries(byStatus).sort((a,b)=>b[1]-a[1]);
   const maxT=Math.max(...sortedT.map(x=>x[1]),1);
   const maxS=Math.max(...sortedS.map(x=>x[1]),1);
-  const maxSt=Math.max(...sortedSt.map(x=>x[1]),1);
+  // Status chart
+  const byStatus={"✅ Ativo":0,"🔄 Em processo":0,"⚠️ Declinado":0,"❌ Cancelado":0};
+  data.forEach(d=>{const g=getStatusGroup(d[F.stage]);if(g==="ativo")byStatus["✅ Ativo"]++;else if(g==="em_processo")byStatus["🔄 Em processo"]++;else if(g==="declinado")byStatus["⚠️ Declinado"]++;else byStatus["❌ Cancelado"]++;});
+  const statusColors={"✅ Ativo":"#16a34a","🔄 Em processo":"#2563eb","⚠️ Declinado":"#f59e0b","❌ Cancelado":"#dc2626"};
+  const maxSt=Math.max(...Object.values(byStatus),1);
 
   document.getElementById("chartsBox").innerHTML=`
     <div class="chart-box">
       <h3>Por Status</h3>
-      ${sortedSt.map(([t,c],i)=>`<div class="bar-row"><div class="bar-label"><span>${t}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxSt)*100}%;background:${["#16a34a","#2563eb","#f59e0b","#dc2626"][i]||COLORS[i%COLORS.length]}"></div></div></div>`).join("")}
-      <h3 style="margin-top:20px">Por Tipo de Instituição</h3>
+      ${Object.entries(byStatus).map(([t,c])=>`<div class="bar-row"><div class="bar-label"><span>${t}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxSt)*100}%;background:${statusColors[t]}"></div></div></div>`).join("")}
+      <h3 style="margin-top:18px">Por Tipo de Instituição</h3>
       ${sortedT.map(([t,c],i)=>`<div class="bar-row"><div class="bar-label"><span>${t}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxT)*100}%;background:${COLORS[i%COLORS.length]}"></div></div></div>`).join("")}
     </div>
     <div class="chart-box">
       <h3>Por Estado (Top 15)</h3>
-      ${sortedS.map(([s,c],i)=>`<div class="bar-row"><div class="bar-label"><span>${s}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxS)*100}%;background:${COLORS[(i+3)%COLORS.length]}"></div></div></div>`).join("")}
+      ${sortedS.map(([s,c],i)=>`<div class="bar-row"><div class="bar-label"><span>${s}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${(c/maxS)*100}%;background:${COLORS[(i+2)%COLORS.length]}"></div></div></div>`).join("")}
     </div>`;
 
   // Table
-  insts.sort((a,b)=>b.ch-a.ch);
+  const insts=data.map(d=>({name:d.TITLE||`#${d.ID}`,type:TYPE_MAP[d[F.type]]||(d[F.type]||"Sem tipo"),state:STATE_MAP[d[F.state]]||(d[F.state]||"N/D"),stage:d[F.stage]})).sort((a,b)=>a.name.localeCompare(b.name));
   document.getElementById("tableBox").innerHTML=`
     <h3>Detalhamento por Instituição (${insts.length})</h3>
     <div class="table-scroll"><table>
-      <thead><tr><th>Instituição</th><th>Status</th><th>Tipo</th><th>UF</th><th class="r">Crianças</th><th class="r">Moderadores</th></tr></thead>
-      <tbody>${insts.map(r=>`<tr>
-        <td class="name">${r.name}</td>
-        <td>${getStatusLabel(r.stage)}</td>
-        <td>${r.type}</td>
-        <td>${r.state}</td>
-        <td class="r">${r.ch||"—"}</td>
-        <td class="r">${r.mo||"—"}</td>
-      </tr>`).join("")}</tbody>
-    </table></div>`;
+      <thead><tr><th>Instituição</th><th>Status</th><th>Fase</th><th>Tipo</th><th>UF</th></tr></thead>
+      <tbody>${insts.map(r=>`<tr><td class="name">${r.name}</td><td>${getStatusBadge(r.stage)}</td><td style="font-size:11px;color:#6b7280">${STAGE_MAP[r.stage]||r.stage||"—"}</td><td>${r.type}</td><td>${r.state}</td></tr>`).join("")}
+      </tbody></table></div>`;
 
-  document.getElementById("footer").textContent=`Pipeline Cadastro • Dados em tempo real via API Bitrix24 • Oliveira Foundation • ${new Date().toLocaleString("pt-BR")}`;
+  document.getElementById("footer").textContent=`Bitrix24 (Pipeline Cadastro) + Google Sheets • Oliveira Foundation • ${new Date().toLocaleString("pt-BR")}`;
 }
 
-loadData();
+// ---- MODAL ----
+function openModal(mode){
+  modalMode=mode;
+  selectedYear="todos";
+  document.getElementById("modalOverlay").classList.add("open");
+  renderModal();
+}
+function closeModal(e){if(e.target===document.getElementById("modalOverlay"))closeModalBtn();}
+function closeModalBtn(){document.getElementById("modalOverlay").classList.remove("open");}
+
+function renderModal(){
+  const isLivros=modalMode==="livros";
+  document.getElementById("modalTitle").textContent=isLivros?"📚 Livros Enviados":"👨‍🏫 Moderadores";
+  document.getElementById("modalSubtitle").textContent="Detalhamento por ano e mês";
+
+  const years=[...new Set(sheetsData.map(d=>d.ano))].sort((a,b)=>b-a);
+  const totalAll=sheetsData.reduce((s,r)=>s+(isLivros?r.livros:r.moderadores),0);
+  const filteredData=selectedYear==="todos"?sheetsData:sheetsData.filter(d=>d.ano===parseInt(selectedYear));
+  const totalFiltered=filteredData.reduce((s,r)=>s+(isLivros?r.livros:r.moderadores),0);
+
+  // Summary
+  document.getElementById("modalSummary").innerHTML=`
+    <div class="summary-card"><div class="sv" style="color:${isLivros?"#10b981":"#f59e0b"}">${totalAll.toLocaleString("pt-BR")}</div><div class="sl">Total geral</div></div>
+    <div class="summary-card"><div class="sv" style="color:#2563eb">${totalFiltered.toLocaleString("pt-BR")}</div><div class="sl">${selectedYear==="todos"?"Todos os anos":selectedYear}</div></div>`;
+
+  // Year tabs
+  document.getElementById("yearTabs").innerHTML=
+    `<button class="year-tab ${selectedYear==="todos"?"active":""}" onclick="selectYear('todos')">Todos</button>`+
+    years.map(y=>`<button class="year-tab ${selectedYear==y?"active":""}" onclick="selectYear(${y})">${y}</button>`).join("");
+
+  // Bar chart by month (for selected year) or by year (for todos)
+  let chartHTML="";
+  if(selectedYear==="todos"){
+    // Group by year
+    const byYear={};
+    years.forEach(y=>byYear[y]=0);
+    sheetsData.forEach(d=>byYear[d.ano]=(byYear[d.ano]||0)+(isLivros?d.livros:d.moderadores));
+    const maxV=Math.max(...Object.values(byYear),1);
+    chartHTML=`<h3 style="font-size:13px;margin-bottom:10px;font-weight:600">Por Ano</h3>`+
+      Object.entries(byYear).sort((a,b)=>a[0]-b[0]).map(([y,v])=>`
+        <div class="bar-row"><div class="bar-label"><span>${y}</span><span>${v.toLocaleString("pt-BR")}</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${(v/maxV)*100}%;background:${isLivros?"#10b981":"#f59e0b"}"></div></div></div>`).join("");
+  } else {
+    // Group by month for selected year
+    const byMonth={};
+    for(let i=1;i<=12;i++) byMonth[i]=0;
+    filteredData.forEach(d=>byMonth[d.mes]=(byMonth[d.mes]||0)+(isLivros?d.livros:d.moderadores));
+    const maxV=Math.max(...Object.values(byMonth),1);
+    chartHTML=`<h3 style="font-size:13px;margin-bottom:10px;font-weight:600">Por Mês — ${selectedYear}</h3>`+
+      Object.entries(byMonth).map(([m,v])=>`
+        <div class="big-bar-row">
+          <div class="big-bar-label">${MONTHS[m-1]}</div>
+          <div class="big-bar-wrap"><div class="big-bar-fill" style="width:${(v/maxV)*100}%;background:${isLivros?"#10b981":"#f59e0b"}">${v>0?v.toLocaleString("pt-BR"):""}</div></div>
+        </div>`).join("");
+  }
+  document.getElementById("modalChart").innerHTML=chartHTML;
+
+  // Month grid (only for specific year)
+  if(selectedYear!=="todos"){
+    const byMonth={};
+    for(let i=1;i<=12;i++) byMonth[i]={livros:0,mods:0};
+    filteredData.forEach(d=>{byMonth[d.mes].livros+=d.livros;byMonth[d.mes].mods+=d.moderadores;});
+    document.getElementById("monthGrid").innerHTML=Object.entries(byMonth).map(([m,v])=>`
+      <div class="month-cell">
+        <div class="m-name">${MONTHS[m-1]}</div>
+        <div class="m-val">${(isLivros?v.livros:v.mods).toLocaleString("pt-BR")}</div>
+      </div>`).join("");
+  } else {
+    document.getElementById("monthGrid").innerHTML="";
+  }
+}
+
+function selectYear(y){
+  selectedYear=y;
+  renderModal();
+}
+
+loadAll();
 </script>
 </body>
 </html>
