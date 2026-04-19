@@ -145,14 +145,28 @@ let modalMode="livros", selectedYear="todos";
 function getStatusGroup(s){if(s==="C25:WON")return"ativo";if(s==="C25:LOSE")return"declinado";if(s==="C25:1")return"cancelado";return"em_processo";}
 function getStatusBadge(s){const g=getStatusGroup(s);if(g==="ativo")return'<span class="badge badge-ativo">✅ Ativo</span>';if(g==="declinado")return'<span class="badge badge-declinado">⚠️ Declinado</span>';if(g==="cancelado")return'<span class="badge badge-cancelado">❌ Cancelado</span>';return'<span class="badge badge-processo">🔄 Em processo</span>';}
 
+function parseMes(m){
+  if(!m||m.trim()==="") return 0;
+  if(!isNaN(m)) return parseInt(m);
+  const map={"janeiro":1,"fevereiro":2,"março":3,"marco":3,"abril":4,"maio":5,"junho":6,"julho":7,"agosto":8,"setembro":9,"outubro":10,"novembro":11,"dezembro":12};
+  // normaliza: remove acentos, lowercase
+  const norm=m.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ã/g,"a").replace(/[^a-z]/g,"");
+  return map[norm]||0;
+}
+
 async function loadSheets(){
   const r=await fetch(SHEETS_URL);
   const text=await r.text();
   const lines=text.trim().split("\n").slice(1);
   return lines.map(l=>{
     const cols=l.split(",");
-    return{ano:parseInt(cols[0])||0, mes:parseInt(cols[1])||0, livros:parseFloat(cols[2])||0, moderadores:parseFloat(cols[3])||0};
-  }).filter(d=>d.ano>0&&d.mes>0);
+    const ano=parseInt(cols[0])||0;
+    const mesRaw=cols[1]?cols[1].trim():"";
+    const mes=parseMes(mesRaw);
+    const livros=parseFloat(cols[2])||0;
+    const mods=parseFloat(cols[3])||0;
+    return{ano, mes, livros, moderadores:mods, isAnual:mes===0};
+  }).filter(d=>d.ano>0);
 }
 
 async function loadDeals(){
@@ -219,8 +233,10 @@ function getFiltered(){
 
 function render(){
   const data=getFiltered();
-  const totalLivros=sheetsData.reduce((s,r)=>s+r.livros,0);
-  const totalMods=sheetsData.reduce((s,r)=>s+r.moderadores,0);
+  // Evita dupla contagem: para anos com detalhamento mensal, soma só os meses; para anos sem, usa o total anual
+  const anosComMeses=[...new Set(sheetsData.filter(d=>d.mes>0).map(d=>d.ano))];
+  const totalLivros=sheetsData.filter(d=>anosComMeses.includes(d.ano)?d.mes>0:d.mes===0).reduce((s,r)=>s+r.livros,0);
+  const totalMods=sheetsData.filter(d=>anosComMeses.includes(d.ano)?d.mes>0:d.mes===0).reduce((s,r)=>s+r.moderadores,0);
   const ativos=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").length;
   const byType={},byState={};
   data.forEach(d=>{
@@ -289,9 +305,11 @@ function renderModal(){
   document.getElementById("modalSubtitle").textContent="Detalhamento por ano e mês";
 
   const years=[...new Set(sheetsData.map(d=>d.ano))].sort((a,b)=>b-a);
-  const totalAll=sheetsData.reduce((s,r)=>s+(isLivros?r.livros:r.moderadores),0);
+  const anosComMeses=[...new Set(sheetsData.filter(d=>d.mes>0).map(d=>d.ano))];
+  const totalAll=sheetsData.filter(d=>anosComMeses.includes(d.ano)?d.mes>0:d.mes===0).reduce((s,r)=>s+(isLivros?r.livros:r.moderadores),0);
   const filteredData=selectedYear==="todos"?sheetsData:sheetsData.filter(d=>d.ano===parseInt(selectedYear));
-  const totalFiltered=filteredData.reduce((s,r)=>s+(isLivros?r.livros:r.moderadores),0);
+  const filtAnosComMeses=[...new Set(filteredData.filter(d=>d.mes>0).map(d=>d.ano))];
+  const totalFiltered=filteredData.filter(d=>filtAnosComMeses.includes(d.ano)?d.mes>0:d.mes===0).reduce((s,r)=>s+(isLivros?r.livros:r.moderadores),0);
 
   // Summary
   document.getElementById("modalSummary").innerHTML=`
