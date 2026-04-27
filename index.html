@@ -130,7 +130,7 @@ body{min-height:100vh;padding-bottom:60px}
 .filter-group select:focus{outline:none;border-color:var(--green-600);box-shadow:0 0 0 3px var(--green-100)}
 
 /* ---------- KPIs ---------- */
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:22px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:22px}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 24px 56px;position:relative;transition:.25s;min-height:170px;box-shadow:var(--shadow-sm);overflow:hidden}
 .kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--navy-700)}
 .kpi:nth-child(5n+1)::before{background:var(--navy-700)}
@@ -415,7 +415,8 @@ td.stage{font-size:11px;color:var(--muted)}
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Ativas</div><div class="kpi-val">631</div><div class="kpi-unit">Cadastradas no programa</div></div>
     <div class="kpi clickable" onclick="openModal('livros')"><div class="kpi-accent" style="background:var(--accent-2)"></div><div class="kpi-lbl">Crianças atingidas</div><div class="kpi-val">221.279</div><div class="kpi-unit">Total histórico</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
     <div class="kpi clickable" onclick="openModal('moderadores')"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-lbl">Moderadores</div><div class="kpi-val">5.830</div><div class="kpi-unit">Formados ao longo dos anos</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tipos de instituição</div><div class="kpi-val">7</div><div class="kpi-unit">Categorias representadas</div></div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tipos de instituição</div><div class="kpi-val">7</div><div class="kpi-unit">Categorias representadas</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green-400)"></div><div class="kpi-lbl">Crianças em andamento</div><div class="kpi-val">—</div><div class="kpi-unit">Vinculadas aos cards</div></div></div>
     </section>
 
     <!-- 2. ANÁLISE POR ANO -->
@@ -825,6 +826,13 @@ function render(){
   const kpiUnitMods=anoFiltro?`Em ${anoFiltro}`:"Formados ao longo dos anos";
 
   const ativos=data.filter(d=>getStatusGroup(d[F.stage])==="ativo").length;
+
+  // Crianças em andamento: soma do campo F.children dos deals filtrados (Bitrix)
+  const criancasAndamento=data.reduce((s,d)=>{
+    const v=parseInt(d[F.children])||0;
+    return s+v;
+  },0);
+
   const byType={},byState={};
   data.forEach(d=>{
     const tId=d[F.type],tName=TYPE_MAP[tId]||(tId?`Tipo ${tId}`:"Sem tipo");
@@ -839,7 +847,8 @@ function render(){
     <div class="kpi"><div class="kpi-accent" style="background:var(--green)"></div><div class="kpi-lbl">Ativas</div><div class="kpi-val">${ativos.toLocaleString("pt-BR")}</div><div class="kpi-unit">Cadastradas no programa</div></div>
     <div class="kpi clickable" onclick="openModal('livros')"><div class="kpi-accent" style="background:var(--accent-2)"></div><div class="kpi-lbl">Crianças atingidas</div><div class="kpi-val">${totalLivros.toLocaleString("pt-BR")}</div><div class="kpi-unit">${kpiUnit}</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
     <div class="kpi clickable" onclick="openModal('moderadores')"><div class="kpi-accent" style="background:var(--amber)"></div><div class="kpi-lbl">Moderadores</div><div class="kpi-val">${totalMods.toLocaleString("pt-BR")}</div><div class="kpi-unit">${kpiUnitMods}</div><div class="kpi-cta"><span>Ver detalhes</span><span>→</span></div></div>
-    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tipos de instituição</div><div class="kpi-val">${Object.keys(byType).length.toLocaleString("pt-BR")}</div><div class="kpi-unit">Categorias representadas</div></div>`;
+    <div class="kpi"><div class="kpi-accent" style="background:var(--blue)"></div><div class="kpi-lbl">Tipos de instituição</div><div class="kpi-val">${Object.keys(byType).length.toLocaleString("pt-BR")}</div><div class="kpi-unit">Categorias representadas</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:var(--green-400)"></div><div class="kpi-lbl">Crianças em andamento</div><div class="kpi-val">${criancasAndamento.toLocaleString("pt-BR")}</div><div class="kpi-unit">Vinculadas aos cards</div></div>`;
 
   // Charts
   const sortedT=Object.entries(byType).sort((a,b)=>b[1]-a[1]);
