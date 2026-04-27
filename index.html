@@ -798,7 +798,7 @@ function buildFilters(){
   document.getElementById("filtersBox").innerHTML=`
     <div class="filter-group"><label>Status</label><select onchange="filters.status=this.value;render()"><option value="">Todos</option><option value="ativo">Ativo</option><option value="em_processo">Em processo</option><option value="declinado">Declinado</option><option value="cancelado">Cancelado</option></select></div>
     <div class="filter-group"><label>Ano</label><select onchange="filters.year=this.value;render()"><option value="">Todos</option>${sY.map(y=>`<option value="${y}">${y}</option>`).join("")}</select></div>
-    <div class="filter-group"><label>Tipo</label><select onchange="filters.type=this.value;render()"><option value="">Todos</option>${Object.entries(TYPE_MAP).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></div>
+    <div class="filter-group"><label>Tipo</label><select onchange="filters.type=this.value;render()"><option value="">Todos</option>${(()=>{const groups={};Object.entries(TYPE_MAP).forEach(([k,v])=>{if(!groups[v])groups[v]=[];groups[v].push(k);});return Object.entries(groups).map(([nome,ids])=>`<option value="${ids.join(",")}">${nome}</option>`).join("");})()}</select></div>
     <div class="filter-group"><label>Estado</label><select onchange="filters.state=this.value;render()"><option value="">Todos</option>${sS.map(id=>`<option value="${id}">${STATE_MAP[id]}</option>`).join("")}</select></div>`;
 }
 
@@ -806,7 +806,7 @@ function getFiltered(){
   let f=[...allDeals];
   if(filters.status) f=f.filter(d=>getStatusGroup(d[F.stage])===filters.status);
   if(filters.year) f=f.filter(d=>d.DATE_CREATE&&new Date(d.DATE_CREATE).getFullYear()===parseInt(filters.year));
-  if(filters.type) f=f.filter(d=>String(d[F.type])===filters.type);
+  if(filters.type){const typeIds=filters.type.split(",");f=f.filter(d=>typeIds.includes(String(d[F.type])));}
   if(filters.state) f=f.filter(d=>String(d[F.state])===filters.state);
   return f;
 }
